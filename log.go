@@ -36,7 +36,7 @@ var Levels = map[Level]string{
 
 func (l Level) String() string { return Levels[l] }
 
-type Formatter func(file string, prefix string, level Level, msg string) string
+type Formatter func(file string, prefix string, level Level, msg string, args ...interface{}) string
 
 type Logger struct {
 	Writer io.Writer
@@ -53,9 +53,10 @@ func New(w io.Writer, level Level, prefix string) *Logger {
 		Writer: w,
 		Level:  level,
 		Prefix: prefix,
-		Format: func(file string, prefix string, level Level, msg string) string {
+		Format: func(file string, prefix string, level Level, msg string, args ...interface{}) string {
 			ts := time.Now().Format("2006-01-02 15:04:05.000")
-			return fmt.Sprintf("%s %s %s %s - %s", ts, prefix, level, file, msg)
+			fm := fmt.Sprintf("%s %s %s %s - %s", ts, prefix, level, file, msg)
+			return fmt.Sprintf(fm, args...)
 		},
 	}
 	l.SetPrefix(prefix)
@@ -113,9 +114,10 @@ func (l *Logger) Write(depth int, level Level, msg string, args ...interface{}) 
 	}
 
 	// format the output using a "custom" function
-	f := l.Format(caller(depth), l.Prefix, level, msg)
+	f := l.Format(caller(depth), l.Prefix, level, msg, args...)
 
-	_, err := fmt.Fprintf(l.Writer, f, args...)
+	// print our message on our writer
+	_, err := fmt.Fprintf(l.Writer, f)
 	return err
 }
 
