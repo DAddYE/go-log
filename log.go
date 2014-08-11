@@ -27,11 +27,10 @@ const (
 )
 
 var Levels = map[Level]string{
-	DEBUG:   "DEBUG",
-	INFO:    "INFO",
-	WARNING: "WARNING",
-	ERROR:   "ERROR",
-	FATAL:   "FATAL",
+	DEBUG: "DEBUG",
+	INFO:  "INFO",
+	ERROR: "ERROR",
+	FATAL: "FATAL",
 }
 
 func (l Level) String() string { return Levels[l] }
@@ -55,6 +54,9 @@ func New(w io.Writer, level Level, prefix string) *Logger {
 		Prefix: prefix,
 		Format: func(file string, prefix string, level Level, msg string, args ...interface{}) string {
 			ts := time.Now().Format("2006-01-02 15:04:05.000")
+			if prefix != "" {
+				prefix += "\t"
+			}
 			fm := fmt.Sprintf("%s %s %s %s - %s", ts, prefix, level, file, msg)
 			return fmt.Sprintf(fm, args...)
 		},
